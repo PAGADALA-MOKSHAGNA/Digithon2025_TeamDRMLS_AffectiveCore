@@ -1,0 +1,45 @@
+# Core ML/DL libraries
+torch>=2.2.0
+transformers>=4.35.0
+torchaudio>=2.2.0
+
+# Audio processing
+librosa==0.10.1
+soundfile==0.12.1
+numpy==1.24.3
+scipy==1.11.3
+
+# ASR engines
+openai-whisper==20231117
+vosk==0.3.45
+
+# Audio utilities
+webrtcvad==2.0.10
+noisereduce==3.0.0
+pydub==0.25.1
+
+# Web frameworks
+flask==3.0.0
+flask-cors==4.0.0
+streamlit==1.28.2
+plotly==5.18.0
+
+# MQTT for ESP32 communication
+paho-mqtt==1.6.1
+
+# Utilities
+python-dotenv==1.0.0
+pyyaml==6.0.1
+pytz==2023.3
+
+# Testing
+pytest==7.4.3
+pytest-cov==4.1.0
+
+# Data handling
+pandas==2.1.3
+
+# Optional: For microphone input in streaming mode
+# Uncomment if you want real-time audio capture:
+# sounddevice==0.4.6
+

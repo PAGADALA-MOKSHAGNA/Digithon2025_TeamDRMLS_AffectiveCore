@@ -1,0 +1,159 @@
+# AffectiveCore/SpeechEmotion Configuration
+
+# ASR Configuration
+asr:
+  engine: "whisper"  # Options: "whisper" or "vosk"
+  whisper:
+    model: "base"  # Options: tiny, base, small, medium, large
+    language: "en"
+    device: "cpu"  # Options: cpu, cuda
+  vosk:
+    model_path: "models/vosk-model-small-en-us-0.15"
+  
+  # Streaming parameters
+  chunk_duration: 4.0  # seconds
+  overlap: 1.0  # seconds
+  sample_rate: 16000
+
+# NLP Emotion Detection
+nlp:
+  model: "j-hartmann/emotion-english-distilroberta-base"
+  device: "cpu"
+  min_confidence: 0.4
+  emotions:
+    - joy
+    - sadness
+    - anger
+    - fear
+    - disgust
+    - surprise
+    - neutral
+
+# Acoustic Feature Extraction
+acoustic:
+  sample_rate: 16000
+  n_mfcc: 13
+  include_delta: true
+  hop_length: 512
+  n_fft: 2048
+  
+  # Feature normalization ranges (for mapping to emotion scores)
+  pitch:
+    low: 80
+    neutral: 150
+    high: 250
+  energy:
+    low: 0.01
+    neutral: 0.03
+    high: 0.08
+  speech_rate:
+    slow: 2.0  # syllables per second
+    normal: 4.0
+    fast: 6.0
+
+# Emotion Fusion
+fusion:
+  # Base weights (tuned for RAVDESS: neutral text + emotional tone)
+  text_weight: 0.35  # alpha (reduced to prioritize tone)
+  tone_weight: 0.65  # 1 - alpha (increased for emotional tone)
+  
+  # Dynamic alpha rules
+  dynamic_alpha:
+    enabled: true
+    high_confidence_threshold: 0.8
+    high_confidence_alpha: 0.85
+    low_confidence_threshold: 0.4
+    low_confidence_alpha: 0.40
+  
+  # Temporal smoothing
+  smoothing:
+    enabled: true
+    window_size: 3
+  
+  # Intensity thresholds
+  intensity:
+    low: 0.5
+    medium: 0.75
+  
+  # Mixed emotion detection
+  mixed_emotion:
+    enabled: true
+    confidence_threshold: 0.6
+
+# Voice Activity Detection (VAD)
+vad:
+  enabled: false  # Disabled for testing RAVDESS
+  aggressiveness: 1  # 0-3, higher = more aggressive filtering (reduced from 2)
+  frame_duration: 30  # milliseconds (10, 20, or 30)
+  min_speech_duration: 0.3  # seconds (reduced from 0.5)
+
+# Audio Preprocessing
+preprocessing:
+  noise_reduction:
+    enabled: true
+    stationary: true
+  normalization:
+    enabled: true
+    target_dbfs: -20.0
+
+# Output Configuration
+output:
+  include_breakdown: true
+  max_json_size: 1024  # bytes
+  include_action_triggers: true
+  
+  # Action mapping for ESP32
+  actions:
+    joy:
+      led_color: "yellow"
+      quote_category: "inspiring"
+      servo_gesture: "wave"
+    sadness:
+      led_color: "blue"
+      quote_category: "supportive"
+      servo_gesture: "slow_nod"
+    anger:
+      led_color: "red"
+      quote_category: "calming"
+      servo_gesture: "sharp_shake"
+    fear:
+      led_color: "purple"
+      quote_category: "reassuring"
+      servo_gesture: "gentle_sway"
+    disgust:
+      led_color: "green"
+      quote_category: "neutral"
+      servo_gesture: "tilt_away"
+    surprise:
+      led_color: "orange"
+      quote_category: "curious"
+      servo_gesture: "quick_up"
+    neutral:
+      led_color: "white"
+      quote_category: "neutral"
+      servo_gesture: "idle"
+
+# MQTT Configuration (for ESP32)
+mqtt:
+  enabled: false
+  broker: "localhost"
+  port: 1883
+  topic: "affective/emotion"
+  qos: 1
+
+# Performance & Logging
+performance:
+  max_latency: 2.0  # seconds
+  enable_profiling: false
+  cache_models: true
+
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/emotion_detection.log"
+
+# Demo & Testing
+demo:
+  test_samples_dir: "test_samples"
+  benchmark_dataset: "RAVDESS"
+
