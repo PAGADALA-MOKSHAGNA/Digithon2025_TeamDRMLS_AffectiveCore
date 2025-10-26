@@ -1,0 +1,256 @@
+
+╔════════════════════════════════════════════════════════════════╗
+║             📊 CODE FLOW DIAGRAM (Main to Show)               ║
+╚════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 1: USER INTERACTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    [User uploads audio.mp3]
+             ↓
+    [app.py - Streamlit Dashboard]
+         Line 217: st.file_uploader()
+             ↓
+    [Save to temporary file]
+         Line 223: tempfile.NamedTemporaryFile()
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 2: MAIN PIPELINE (emotion_detection.py)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+class EmotionDetectionPipeline:
+    
+    def process_file(audio_path):
+        
+        # Load and preprocess audio
+        ├── utils.load_audio()
+        │   └── librosa.load()  → audio array
+        
+        # Step 2A: Speech to Text
+        ├── speech_to_text.transcribe()
+        │   ├── File: speech_to_text.py, Line 133
+        │   ├── self.model.transcribe(audio)
+        │   └── Returns: "I am so angry!"
+        
+        # Step 2B: Text Emotion Analysis
+        ├── text_emotion.analyze()
+        │   ├── File: text_emotion.py, Line 72
+        │   ├── self.tokenizer(text)
+        │   ├── self.model(inputs)
+        │   ├── torch.softmax(logits)
+        │   └── Returns: {anger: 0.85, joy: 0.05, ...}
+        
+        # Step 2C: Voice Tone Analysis
+        ├── voice_tone.analyze()
+        │   ├── File: voice_tone.py, Line 95
+        │   ├── extract_acoustic_features()
+        │   │   ├── Pitch: librosa.yin()
+        │   │   ├── Energy: librosa.feature.rms()
+        │   │   ├── Rate: count_syllables()
+        │   │   └── MFCC: librosa.feature.mfcc()
+        │   ├── map_features_to_emotions()
+        │   │   ├── If high_energy + fast_rate → anger
+        │   │   ├── If low_energy + slow_rate → sadness
+        │   │   └── Rule-based mapping
+        │   └── Returns: {anger: 0.80, sadness: 0.10, ...}
+        
+        # Step 2D: Multimodal Fusion
+        └── fusion.process()
+            ├── File: fusion.py, Line 89
+            ├── alpha = config['text_weight']  # 0.35
+            ├── For each emotion:
+            │   fused[emotion] = 
+            │       alpha × text[emotion] +
+            │       (1-alpha) × tone[emotion]
+            ├── Apply temporal smoothing
+            ├── Map intensity (Low/Med/High)
+            └── Returns: {
+                  emotion: "anger",
+                  intensity: "High",
+                  confidence: 0.82,
+                  ...
+                }
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 3: OUTPUT TO USER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    [Result dictionary]
+             ↓
+    [app.py displays results]
+         ├── st.metric("Emotion", "ANGER")
+         ├── st.metric("Intensity", "High")
+         ├── st.metric("Confidence", "82%")
+         ├── Emotion breakdown chart
+         └── Acoustic features display
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KEY FILES & THEIR ROLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. emotion_detection.py (500 lines)
+   Role: Main orchestrator
+   Key class: EmotionDetectionPipeline
+   Key method: process_file() - Line 145
+   
+2. speech_to_text.py (400 lines)
+   Role: ASR (Speech → Text)
+   Key class: SpeechToText
+   Key method: transcribe() - Line 83
+   Technology: OpenAI Whisper
+   
+3. text_emotion.py (200 lines)
+   Role: NLP emotion classifier
+   Key class: TextEmotion
+   Key method: analyze() - Line 72
+   Technology: DistilRoBERTa
+   
+4. voice_tone.py (450 lines)
+   Role: Acoustic feature extraction
+   Key class: VoiceTone
+   Key methods:
+   - extract_acoustic_features() - Line 138
+   - map_features_to_emotions() - Line 251
+   Technology: librosa
+   
+5. fusion.py (300 lines)
+   Role: Multimodal fusion logic
+   Key class: EmotionFusion
+   Key method: process() - Line 89
+   Algorithm: Weighted averaging
+   
+6. app.py (500 lines)
+   Role: User interface
+   Technologies: Streamlit, Flask
+   Key function: run_streamlit_dashboard() - Line 163
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CONFIGURATION (config.yaml)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Key settings you can change:
+
+Line 5-8: ASR model selection
+  asr_engine: whisper
+  whisper_model: base
+  
+Line 57-58: Fusion weights (IMPORTANT!)
+  text_weight: 0.35   # How much to trust text
+  tone_weight: 0.65   # How much to trust voice
+  
+Line 27-52: Acoustic thresholds
+  pitch_high: 200    # Hz
+  energy_high: 0.15  # RMS
+  rate_fast: 5.0     # syllables/sec
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EXAMPLE: TRACING ONE REQUEST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Input: "I am extremely angry!" (angry.mp3)
+
+1. app.py Line 223:
+   Upload file → /tmp/tmpXYZ123.mp3
+
+2. emotion_detection.py Line 145:
+   pipeline.process_file("/tmp/tmpXYZ123.mp3")
+   
+3. speech_to_text.py Line 133:
+   Whisper transcribes → "I am extremely angry!"
+   
+4. text_emotion.py Line 72:
+   RoBERTa analyzes → {anger: 0.85, joy: 0.05, ...}
+   
+5. voice_tone.py Line 138:
+   Extract features → {pitch: 210Hz, energy: 0.18, rate: 5.2}
+   
+6. voice_tone.py Line 251:
+   Map to emotions → {anger: 0.80, surprise: 0.15, ...}
+   
+7. fusion.py Line 89:
+   Fuse both:
+   anger = 0.35 × 0.85 + 0.65 × 0.80
+         = 0.2975 + 0.52
+         = 0.8175
+   
+8. fusion.py Line 180:
+   Map intensity: 0.82 > 0.7 → "High"
+   
+9. Return to app.py:
+   {
+     emotion: "anger",
+     intensity: "High", 
+     confidence: 0.82,
+     latency: 0.735
+   }
+   
+10. app.py Line 255:
+    Display results to user
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ALGORITHM DETAILS (For Technical Questions)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. PITCH EXTRACTION (voice_tone.py Line 158)
+   Method: YIN algorithm (librosa.yin)
+   - Autocorrelation-based
+   - Robust to noise
+   - Returns F0 (fundamental frequency)
+
+2. ENERGY CALCULATION (voice_tone.py Line 175)
+   Method: Root Mean Square (RMS)
+   Formula: sqrt(mean(audio²))
+   - Measures loudness
+   - Range: 0-1
+
+3. SPEECH RATE (voice_tone.py Line 212)
+   Method: Syllable counting
+   - Detect vowel transitions
+   - Count per second
+   - Typical: 2-6 syllables/sec
+
+4. MFCC FEATURES (voice_tone.py Line 186)
+   Method: Mel-frequency cepstral coefficients
+   - 13 coefficients
+   - Captures voice quality
+   - Used in all speech systems
+
+5. FUSION ALGORITHM (fusion.py Line 89)
+   Method: Weighted averaging
+   Formula: final = α × text + (1-α) × tone
+   - α = text_weight (configurable)
+   - Can be dynamic based on confidence
+   - Smoothed over last 3 predictions
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DEPENDENCIES (requirements.txt)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Core ML:
+  torch>=2.2.0           - PyTorch (ML framework)
+  transformers>=4.35.0   - Hugging Face (RoBERTa)
+  openai-whisper>=20230314 - OpenAI Whisper (ASR)
+
+Audio Processing:
+  librosa>=0.10.0        - Audio analysis
+  soundfile>=0.12.1      - Audio I/O
+  noisereduce>=3.0.0     - Noise reduction
+
+Web:
+  streamlit>=1.28.0      - Dashboard
+  flask>=3.0.0           - REST API
+  flask-cors>=4.0.0      - CORS handling
+
+Utilities:
+  numpy>=1.24.0          - Numerical computing
+  pyyaml>=6.0            - Config parsing
+  tqdm>=4.66.0           - Progress bars
+
