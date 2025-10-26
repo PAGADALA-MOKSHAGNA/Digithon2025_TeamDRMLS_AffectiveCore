@@ -2,7 +2,7 @@ import cv2
 from deepface import DeepFace
 
 # Load OpenCV's face detector (Haar Cascade)
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+face_cascade = cv2.CascadeClassifier(cv2.samples.findFile("haarcascade_frontalface_default.xml"))
 
 # Open webcam
 cap = cv2.VideoCapture(0)
